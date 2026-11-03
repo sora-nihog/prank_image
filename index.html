@@ -1,0 +1,118 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SORA SYSTEM ALERT</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(145deg,#a8c1e9,#8580c8,#b7c9e8);
+  font-family: Arial, sans-serif;
+}
+.home {
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 35px 15px;
+}
+.app {
+  border: 0;
+  background: transparent;
+  color: white;
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.app-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+}
+.wa { background: #20c96b; }
+.snap { background: #ffeb25; }
+.other { background: #edf1fb; color: #333; }
+#alert {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #000b;
+}
+#alert.show { display: flex; }
+.panel {
+  width: 100%;
+  max-width: 340px;
+  background: #080808;
+  border: 2px solid red;
+  border-radius: 12px;
+  padding: 28px 18px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 0 28px red;
+}
+.mark { color: red; font-size: 50px; }
+h1 { color: red; font-size: 30px; }
+.status { color: #ff7777; margin: 22px 0; }
+.close {
+  background: #8f1010;
+  color: white;
+  border: 1px solid red;
+  border-radius: 8px;
+  padding: 13px 24px;
+  font-size: 15px;
+}
+.demo { color: #aaa; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<main class="home">
+  <button class="app"><span class="app-icon wa">☎</span>WhatsApp</button>
+  <button class="app"><span class="app-icon snap">👻</span>Snapchat</button>
+  <button class="app"><span class="app-icon other">♫</span>Music</button>
+  <button class="app"><span class="app-icon other">▧</span>Gallery</button>
+  <button class="app"><span class="app-icon other">⚙</span>Settings</button>
+  <button class="app"><span class="app-icon other">◎</span>Browser</button>
+</main>
+
+<section id="alert" role="dialog" aria-modal="true">
+  <div class="panel">
+    <div class="mark">⚠</div>
+    <h1>YOUR DEVICE IS HACKED</h1>
+    <p>SORA SYSTEM ALERT</p>
+    <p class="status">UNAUTHORIZED ACCESS DETECTED</p>
+    <button class="close" id="close">✕ CLOSE ALERT</button>
+    <p class="demo">DEMO ONLY · No device changes made</p>
+  </div>
+</section>
+
+<script>
+const alertBox = document.getElementById("alert");
+
+document.addEventListener("click", (event) => {
+  if (event.target.id === "close") {
+    event.stopPropagation();
+    alertBox.classList.remove("show");
+    return;
+  }
+
+  if (!alertBox.classList.contains("show")) {
+    alertBox.classList.add("show");
+  }
+});
+</script>
+
+</body>
+</html>
