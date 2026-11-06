@@ -1,210 +1,338 @@
-
-<!DOCTYPE html>
+　<!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Lighthouse | codingwithvishesh V2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<title>SORA PYTHON RUNNER</title>
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #010a15;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+        canvas {
+            display: block;
+        }
 
-<style>
-* {
-  box-sizing: border-box;
-}
+        /* Jabardast Cyberpunk/Anime Footer */
+        #footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #00e5ff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff, 0 0 40px #00e5ff;
+            pointer-events: none;
+            z-index: 10;
+            animation: pulse 2s infinite alternate;
+        }
 
-body {
-  margin: 0;
-  padding: 20px;
-  background: #080d18;
-  color: #00ff88;
-  font-family: Arial, sans-serif;
-}
+        #footer span {
+            color: #ff0055;
+            text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055;
+            display: inline-block;
+            animation: heartbeat 1.5s infinite;
+        }
 
-header {
-  text-align: center;
-  padding: 15px;
-}
+        @keyframes pulse {
+            0% {
+                opacity: 0.8;
+            }
 
-h1 {
-  text-shadow: 0 0 12px #00ff88;
-}
+            100% {
+                opacity: 1;
+                text-shadow: 0 0 15px #00e5ff, 0 0 30px #00e5ff, 0 0 60px #00e5ff;
+            }
+        }
 
-.panel {
-  background: #111b2b;
-  border: 1px solid #174c40;
-  border-radius: 15px;
-  padding: 18px;
-  margin-bottom: 20px;
-}
+        @keyframes heartbeat {
 
-label {
-  display: block;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
+            0%,
+            100% {
+                transform: scale(1);
+            }
 
-textarea {
-  width: 100%;
-  height: 280px;
-  background: #050a12;
-  color: #00ff88;
-  border: 1px solid #225b49;
-  border-radius: 10px;
-  padding: 15px;
-  font-size: 17px;
-  font-family: monospace;
-  resize: vertical;
-}
-
-button {
-  border: none;
-  border-radius: 10px;
-  padding: 15px 22px;
-  margin: 12px 5px 0 0;
-  font-size: 17px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.run {
-  background: #00ff88;
-  color: #00140b;
-}
-
-.reset {
-  background: #27374b;
-  color: white;
-}
-
-button:disabled {
-  opacity: 0.5;
-}
-
-#output {
-  background: #ffffff;
-  color: #111111;
-  min-height: 180px;
-  padding: 18px;
-  border-radius: 10px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  font-family: monospace;
-  font-size: 17px;
-}
-
-#status {
-  color: #9baaba;
-  font-size: 13px;
-  margin-top: 12px;
-}
-
-footer {
-  text-align: center;
-  color: #718096;
-  margin-top: 25px;
-}
-</style>
+            50% {
+                transform: scale(1.2);
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<header>
-  <h1>🐍 SORA PYTHON RUNNER</h1>
-  <p>Write • Run • Create</p>
-</header>
+    <canvas id="animeCanvas"></canvas>
+    <div id="footer">Made with <span>❤️</span> codingwithvishesh</div>
 
-<div class="panel">
+    <script>
+        const canvas = document.getElementById('animeCanvas');
+        const ctx = canvas.getContext('2d');
 
-  <label>💻 Your Python Code</label>
+        let width, height;
+        let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        let stars = [];
+        let particles = [];
+        let boats = [];
+        let mountains = [];
 
-  <textarea id="editor" spellcheck="false">name = "sora"
-print(name)</textarea>
+        function init() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
 
-  <button class="run" id="runButton" onclick="runCode()">
-    ▶ RUN CODE
-  </button>
+            // Generate Stars
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * (height * 0.7),
+                    size: Math.random() * 1.5,
+                    alpha: Math.random()
+                });
+            }
 
-  <button class="reset" onclick="resetCode()">
-    ↺ RESET
-  </button>
+            // Generate Mountain vertices (jagged peaks)
+            mountains = [];
+            let currentX = 0;
+            const mountainBaseY = height * 0.75;
+            while (currentX < width) {
+                currentX += Math.random() * 100 + 50; // Random width
+                mountains.push({
+                    x: currentX,
+                    y: mountainBaseY - (Math.random() * 200 + 100) // Random height
+                });
+            }
+            // Close the shape
+            mountains.push({ x: width, y: mountainBaseY });
+            mountains.push({ x: width, y: height }); // Make it solid below ground
+            mountains.push({ x: 0, y: height });
+            mountains.unshift({ x: 0, y: mountainBaseY });
 
-  <p id="status">Python is ready to load.</p>
 
-</div>
+            // Generate Boats
+            boats = [
+                { x: width * 0.3, y: height * 0.85, speed: 0.8, size: 30, direction: 1, cabinColor: '#ff9900' },
+                { x: width * 0.7, y: height * 0.92, speed: 1.2, size: 25, direction: -1, cabinColor: '#ffee00' }
+            ];
+        }
 
-<div class="panel">
+        // Mouse Tracker
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
 
-  <label>🖥️ Output</label>
+        window.addEventListener('touchmove', (e) => {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        });
 
-  <pre id="output">Your output will appear here...</pre>
+        window.addEventListener('resize', init);
 
-</div>
+        function drawBackground() {
+            // Anime Sky Gradient
+            let gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#010a15'); // Deep space
+            gradient.addColorStop(0.5, '#0b1d3a'); // Night blue
+            gradient.addColorStop(0.8, '#1e3c72'); // Horizon glow
+            gradient.addColorStop(1, '#000000'); // Ocean shadow
 
-<footer>
-  SORA PYTHON RUNNER
-  <p>Made with HTML, CSS & Python</p>
-</footer>
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
 
-<script>
-let pyodide = null;
+            // Draw Stars
+            stars.forEach(star => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+                star.alpha += (Math.random() - 0.5) * 0.05;
+                if (star.alpha < 0) star.alpha = 0;
+                if (star.alpha > 1) star.alpha = 1;
+            });
+        }
 
-const editor = document.getElementById("editor");
-const output = document.getElementById("output");
-const status = document.getElementById("status");
-const runButton = document.getElementById("runButton");
+        function drawMountains() {
+            // Draw Mountain Silhouettes
+            ctx.fillStyle = '#050505'; // Dark color, behind the lighthouse
+            ctx.beginPath();
+            ctx.moveTo(mountains[0].x, mountains[0].y);
+            for (let i = 1; i < mountains.length; i++) {
+                ctx.lineTo(mountains[i].x, mountains[i].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
 
-async function runCode() {
+        function drawOcean() {
+            // Draw Ocean (below mountains and lighthouse island)
+            ctx.fillStyle = 'rgba(2, 8, 20, 0.95)';
+            ctx.fillRect(0, height * 0.75, width, height * 0.25);
+        }
 
-  runButton.disabled = true;
-  output.textContent = "";
-  status.textContent = "⏳ Loading Python...";
+        function drawBoats() {
+            boats.forEach(boat => {
+                // Move boat
+                boat.x += boat.speed * boat.direction;
 
-  try {
+                // Reset position if it goes off-screen
+                if (boat.direction === 1 && boat.x > width + boat.size * 2) {
+                    boat.x = -boat.size * 2;
+                } else if (boat.direction === -1 && boat.x < -boat.size * 2) {
+                    boat.x = width + boat.size * 2;
+                }
 
-    if (!pyodide) {
-      pyodide = await loadPyodide();
-    }
+                // Draw boat silhouette
+                ctx.fillStyle = '#111';
+                ctx.beginPath();
+                ctx.moveTo(boat.x, boat.y);
+                ctx.lineTo(boat.x + boat.size, boat.y);
+                ctx.lineTo(boat.x + boat.size * 1.2, boat.y + boat.size * 0.3);
+                ctx.lineTo(boat.x - boat.size * 0.2, boat.y + boat.size * 0.3);
+                ctx.closePath();
+                ctx.fill();
 
-    let result = "";
+                // Draw warm cabin light
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = boat.cabinColor;
+                ctx.fillStyle = boat.cabinColor;
+                ctx.fillRect(boat.x + boat.size * 0.2, boat.y - boat.size * 0.2, boat.size * 0.4, boat.size * 0.2);
+                ctx.shadowBlur = 0; // Reset shadow
+            });
+        }
 
-    pyodide.setStdout({
-      batched: (text) => {
-        result += text + "\n";
-      }
-    });
+        function drawLighthouse() {
+            const lx = width * 0.15; // Left side
+            const ly = height * 0.75; // Ground level
 
-    pyodide.setStderr({
-      batched: (text) => {
-        result += text + "\n";
-      }
-    });
+            // Island/Rock (Must be drawn over the deep ocean)
+            ctx.fillStyle = '#0a0a0a';
+            ctx.beginPath();
+            ctx.moveTo(lx - 120, ly);
+            ctx.lineTo(lx + 120, ly);
+            ctx.lineTo(lx + 180, height);
+            ctx.lineTo(lx - 180, height);
+            ctx.fill();
 
-    await pyodide.runPythonAsync(editor.value);
+            // Tower Base
+            ctx.beginPath();
+            ctx.moveTo(lx - 30, ly);
+            ctx.lineTo(lx + 30, ly);
+            ctx.lineTo(lx + 20, ly - 200);
+            ctx.lineTo(lx - 20, ly - 200);
+            ctx.fill();
 
-    output.textContent = result || "Code executed successfully!";
-    status.textContent = "✅ Execution completed";
+            // Glowing Top Room
+            ctx.fillStyle = '#111';
+            ctx.fillRect(lx - 25, ly - 220, 50, 20);
 
-  } catch (error) {
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00e5ff';
+            ctx.fillStyle = '#e0f7fa';
+            ctx.fillRect(lx - 15, ly - 215, 30, 10); // Light Bulb core
+            ctx.shadowBlur = 0;
 
-    output.textContent = String(error);
-    status.textContent = "❌ Error";
+            // Roof
+            ctx.fillStyle = '#050505';
+            ctx.beginPath();
+            ctx.moveTo(lx - 35, ly - 220);
+            ctx.lineTo(lx + 35, ly - 220);
+            ctx.lineTo(lx, ly - 260);
+            ctx.fill();
 
-  } finally {
-    runButton.disabled = false;
-  }
-}
+            return { x: lx, y: ly - 210 }; // Return light source coordinate
+        }
 
-function resetCode() {
+        function drawLightBeam(lightPos) {
+            // Calculate angle towards mouse
+            const dx = mouse.x - lightPos.x;
+            const dy = mouse.y - lightPos.y;
+            const angle = Math.atan2(dy, dx);
 
-  editor.value = 'name = "sora"\nprint(name)';
-  output.textContent = "Your output will appear here...";
-  status.textContent = "Code reset successfully.";
+            const beamLength = width * 1.5;
+            const spread = 0.35; // How wide the beam is
 
-}
-</script>
+            ctx.save();
+            ctx.translate(lightPos.x, lightPos.y);
+            ctx.rotate(angle);
 
+            // Volumetric glowing beam
+            let beamGradient = ctx.createLinearGradient(0, 0, beamLength, 0);
+            beamGradient.addColorStop(0, 'rgba(0, 229, 255, 0.8)'); // Cyan core
+            beamGradient.addColorStop(0.5, 'rgba(0, 229, 255, 0.2)');
+            beamGradient.addColorStop(1, 'rgba(0, 229, 255, 0)');
+
+            ctx.globalCompositeOperation = 'screen';
+            ctx.fillStyle = beamGradient;
+
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(beamLength, Math.sin(spread) * beamLength);
+            ctx.lineTo(beamLength, -Math.sin(spread) * beamLength);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+
+            // Add Light Particles in the air
+            if (Math.random() < 0.3) {
+                particles.push({
+                    x: lightPos.x,
+                    y: lightPos.y,
+                    speedX: Math.cos(angle + (Math.random() - 0.5) * spread) * (Math.random() * 5 + 2),
+                    speedY: Math.sin(angle + (Math.random() - 0.5) * spread) * (Math.random() * 5 + 2),
+                    life: 1,
+                    size: Math.random() * 3
+                });
+            }
+
+            // Update and draw particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.life -= 0.02;
+
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                } else {
+                    ctx.beginPath();
+                    ctx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            drawBackground();
+            drawMountains(); // Draw behind everything else on ground level
+            drawOcean();
+            drawBoats(); // Boats on the ocean surface
+            const lightSource = drawLighthouse(); // Finally the lighthouse structure
+            drawLightBeam(lightSource);
+
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+    </script>
 </body>
+
 </html>
