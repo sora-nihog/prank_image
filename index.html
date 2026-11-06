@@ -4,7 +4,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SORA CODE RUNNER</title>
+
+<title>SORA PYTHON RUNNER</title>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
 
 <style>
 * {
@@ -25,47 +28,43 @@ header {
 }
 
 h1 {
-  font-size: 27px;
   text-shadow: 0 0 12px #00ff88;
-}
-
-.subtitle {
-  color: #8999aa;
 }
 
 .panel {
   background: #111b2b;
   border: 1px solid #174c40;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 18px;
+  border-radius: 15px;
+  padding: 18px;
+  margin-bottom: 20px;
 }
 
 label {
   display: block;
-  margin-bottom: 12px;
+  font-size: 20px;
   font-weight: bold;
+  margin-bottom: 15px;
 }
 
 textarea {
   width: 100%;
-  height: 270px;
-  resize: vertical;
+  height: 280px;
   background: #050a12;
   color: #00ff88;
   border: 1px solid #225b49;
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 17px;
   font-family: monospace;
-  font-size: 14px;
-  outline: none;
+  resize: vertical;
 }
 
 button {
-  padding: 12px 20px;
-  margin: 10px 5px 0 0;
   border: none;
-  border-radius: 7px;
+  border-radius: 10px;
+  padding: 15px 22px;
+  margin: 12px 5px 0 0;
+  font-size: 17px;
   font-weight: bold;
   cursor: pointer;
 }
@@ -80,18 +79,31 @@ button {
   color: white;
 }
 
-iframe {
-  width: 100%;
-  height: 250px;
-  background: white;
-  border: none;
-  border-radius: 8px;
+button:disabled {
+  opacity: 0.5;
+}
+
+#output {
+  background: #ffffff;
+  color: #111111;
+  min-height: 180px;
+  padding: 18px;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: monospace;
+  font-size: 17px;
+}
+
+#status {
+  color: #9baaba;
+  font-size: 13px;
+  margin-top: 12px;
 }
 
 footer {
   text-align: center;
-  color: #657487;
-  font-size: 12px;
+  color: #718096;
   margin-top: 25px;
 }
 </style>
@@ -100,71 +112,98 @@ footer {
 <body>
 
 <header>
-  <h1>⚡ SORA CODE RUNNER</h1>
-  <p class="subtitle">Write • Run • Create</p>
+  <h1>🐍 SORA PYTHON RUNNER</h1>
+  <p>Write • Run • Create</p>
 </header>
 
 <div class="panel">
-  <label>💻 Your Code</label>
 
-  <textarea id="editor" spellcheck="false"><!DOCTYPE html>
-<html>
-<head>
-<style>
-body {
-  background: #101827;
-  color: #00ff88;
-  text-align: center;
-  font-family: Arial;
-  padding: 30px;
-}
-</style>
-</head>
+  <label>💻 Your Python Code</label>
 
-<body>
-<h1>Hello Sora!</h1>
-<p>Welcome to my code runner.</p>
-<button onclick="alert('Sora Code Runner!')">
-Click Me
-</button>
-</body>
-</html></textarea>
+  <textarea id="editor" spellcheck="false">name = "sora"
+print(name)</textarea>
 
-  <button class="run" onclick="runCode()">
+  <button class="run" id="runButton" onclick="runCode()">
     ▶ RUN CODE
   </button>
 
   <button class="reset" onclick="resetCode()">
     ↺ RESET
   </button>
+
+  <p id="status">Python is ready to load.</p>
+
 </div>
 
 <div class="panel">
-  <label>🖥️ Output Preview</label>
-  <iframe id="output" sandbox="allow-scripts"></iframe>
+
+  <label>🖥️ Output</label>
+
+  <pre id="output">Your output will appear here...</pre>
+
 </div>
 
 <footer>
-  SORA CODE RUNNER • Made with HTML, CSS & JavaScript
+  SORA PYTHON RUNNER
+  <p>Made with HTML, CSS & Python</p>
 </footer>
 
 <script>
+let pyodide = null;
+
 const editor = document.getElementById("editor");
 const output = document.getElementById("output");
+const status = document.getElementById("status");
+const runButton = document.getElementById("runButton");
 
-const starterCode = editor.value;
+async function runCode() {
 
-function runCode() {
-  output.srcdoc = editor.value;
+  runButton.disabled = true;
+  output.textContent = "";
+  status.textContent = "⏳ Loading Python...";
+
+  try {
+
+    if (!pyodide) {
+      pyodide = await loadPyodide();
+    }
+
+    let result = "";
+
+    pyodide.setStdout({
+      batched: (text) => {
+        result += text + "\n";
+      }
+    });
+
+    pyodide.setStderr({
+      batched: (text) => {
+        result += text + "\n";
+      }
+    });
+
+    await pyodide.runPythonAsync(editor.value);
+
+    output.textContent = result || "Code executed successfully!";
+    status.textContent = "✅ Execution completed";
+
+  } catch (error) {
+
+    output.textContent = String(error);
+    status.textContent = "❌ Error";
+
+  } finally {
+    runButton.disabled = false;
+  }
 }
 
 function resetCode() {
-  editor.value = starterCode;
-  runCode();
-}
 
-// Run the starter code
-runCode();
+  editor.value = 'name = "sora"\nprint(name)';
+  output.textContent = "Your output will appear here...";
+  status.textContent = "Code reset successfully.";
+
+}
 </script>
 
 </body>
